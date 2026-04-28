@@ -1,10 +1,27 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
+import React from 'react';
+import {
+    Box,
+    Button,
+    Checkbox,
+    Container,
+    FormControl,
+    FormLabel,
+    Heading,
+    Input,
+    Stack,
+    Text,
+    Link as ChakraLink,
+    VStack,
+    useColorModeValue,
+    Icon,
+    Alert,
+    AlertIcon,
+    FormErrorMessage,
+    Center,
+    Flex
+} from '@chakra-ui/react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { MdHub, MdLockOpen } from 'react-icons/md';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -13,88 +30,119 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
     });
 
+    const bgGradient = useColorModeValue(
+        'radial(blue.50 0%, white 100%)',
+        'radial(gray.900 0%, black 100%)'
+    );
+    const cardBg = useColorModeValue('white', 'gray.800');
+    const borderColor = useColorModeValue('gray.100', 'gray.700');
+
     const submit = (e) => {
         e.preventDefault();
-
         post(route('login'), {
             onFinish: () => reset('password'),
         });
     };
 
     return (
-        <GuestLayout>
+        <Box bg={bgGradient} minH="100vh">
             <Head title="Log in" />
+            
+            <Container maxW="container.sm" pt={20}>
+                <VStack spacing={8} align="stretch">
+                    <Center flexDir="column">
+                        <Icon as={MdHub} w={12} h={12} color="blue.500" mb={4} />
+                        <Heading size="xl" letterSpacing="tight">Welcome Back</Heading>
+                        <Text color="gray.500" mt={2}>Enter your credentials to access your hub</Text>
+                    </Center>
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+                    <Box 
+                        bg={cardBg} 
+                        p={10} 
+                        rounded="3xl" 
+                        shadow="2xl" 
+                        border="1px" 
+                        borderColor={borderColor}
+                    >
+                        <form onSubmit={submit}>
+                            <VStack spacing={5}>
+                                {status && (
+                                    <Alert status="success" rounded="xl">
+                                        <AlertIcon />
+                                        {status}
+                                    </Alert>
+                                )}
 
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                                <FormControl isInvalid={errors.email}>
+                                    <FormLabel>Email Address</FormLabel>
+                                    <Input 
+                                        type="email" 
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        placeholder="name@company.com"
+                                        rounded="xl"
+                                        h="12"
+                                        autoFocus
+                                    />
+                                    <FormErrorMessage>{errors.email}</FormErrorMessage>
+                                </FormControl>
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
+                                <FormControl isInvalid={errors.password}>
+                                    <FormLabel>Password</FormLabel>
+                                    <Input 
+                                        type="password" 
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
+                                        placeholder="••••••••"
+                                        rounded="xl"
+                                        h="12"
+                                    />
+                                    <FormErrorMessage>{errors.password}</FormErrorMessage>
+                                </FormControl>
 
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
+                                <Flex w="full" justify="space-between" align="center">
+                                    <Checkbox 
+                                        colorScheme="blue" 
+                                        isChecked={data.remember}
+                                        onChange={(e) => setData('remember', e.target.checked)}
+                                    >
+                                        Remember me
+                                    </Checkbox>
+                                    {canResetPassword && (
+                                        <ChakraLink as={Link} href={route('password.request')} color="blue.500" fontSize="sm" fontWeight="bold">
+                                            Forgot password?
+                                        </ChakraLink>
+                                    )}
+                                </Flex>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                                <Button 
+                                    type="submit" 
+                                    colorScheme="blue" 
+                                    w="full" 
+                                    h="12" 
+                                    rounded="xl" 
+                                    isLoading={processing}
+                                    leftIcon={<MdLockOpen />}
+                                    shadow="lg"
+                                    _hover={{ shadow: 'xl', transform: 'translateY(-2px)' }}
+                                    transition="all 0.2s"
+                                >
+                                    Sign In
+                                </Button>
+                            </VStack>
+                        </form>
+                    </Box>
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                    <Center>
+                        <Text color="gray.500" fontSize="sm">
+                            Don't have an account?{' '}
+                            <ChakraLink as={Link} href={route('register')} color="blue.500" fontWeight="bold">
+                                Create Account
+                            </ChakraLink>
+                        </Text>
+                    </Center>
+                </VStack>
+            </Container>
+        </Box>
     );
 }
