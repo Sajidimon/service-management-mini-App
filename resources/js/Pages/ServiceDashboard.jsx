@@ -54,6 +54,7 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
     };
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     
     const toast = useToast();
 
@@ -75,6 +76,8 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
         } catch (error) {
             console.error("Error fetching services", error);
             setServices([]);
+        } finally {
+            setInitialLoading(false);
         }
     };
 
@@ -181,7 +184,11 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
 
                 <Container maxW="container.xl" py={10} px={{ base: 4, md: 10 }}>
                     {currentView === 'services' ? (
-                        services.length === 0 && !search && !statusFilter ? (
+                        initialLoading ? (
+                            <Flex justify="center" align="center" h="400px">
+                                <Text fontSize="lg" color="gray.500">Loading your services...</Text>
+                            </Flex>
+                        ) : services.length === 0 && !search && !statusFilter ? (
                             <EmptyState onOpenModal={handleOpenModal} />
                         ) : (
                             <ServiceList 
