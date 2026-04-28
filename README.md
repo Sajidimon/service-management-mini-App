@@ -1,4 +1,6 @@
-# Digital Service Web App
+# Digital Service Orchestrator
+
+![Digital Service Management Dashboard](public/images/hero-dashboard.png)
 
 A modern, high-performance Service Management application built with **Laravel 11**, **Inertia.js**, **React**, and **Chakra UI**. This project features a cutting-edge fintech/cyber aesthetic and a robust backend designed for scaling digital service workflows.
 
