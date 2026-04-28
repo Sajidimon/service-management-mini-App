@@ -27,11 +27,17 @@ class ServiceController extends Controller
             $query->where('status', $request->status);
         }
 
-        $services = $query->latest()->get();
+        $services = $query->latest()->paginate(10);
 
         return response()->json([
             'status' => 'success',
-            'data' => $services
+            'data' => $services->items(),
+            'meta' => [
+                'current_page' => $services->currentPage(),
+                'last_page' => $services->lastPage(),
+                'per_page' => $services->perPage(),
+                'total' => $services->total(),
+            ]
         ]);
     }
 

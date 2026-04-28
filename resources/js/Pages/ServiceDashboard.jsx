@@ -32,6 +32,7 @@ import DashboardOverview from '@/Components/Dashboard/DashboardOverview';
 export default function ServiceDashboard({ auth, services: initialServices = [], filters }) {
     const [currentView, setCurrentView] = useState('dashboard');
     const [services, setServices] = useState(Array.isArray(initialServices) ? initialServices : []);
+    const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
     const [search, setSearch] = useState(filters?.search || '');
     const [statusFilter, setStatusFilter] = useState(filters?.status || '');
     const [debouncedSearch] = useDebounce(search, 500);
@@ -57,14 +58,19 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
     const toast = useToast();
 
     // Fetch services from API
-    const fetchServices = async () => {
+    const fetchServices = async (page = 1) => {
         try {
             const response = await axios.get('/api/services', {
-                params: { search: debouncedSearch, status: statusFilter }
+                params: { 
+                    search: debouncedSearch, 
+                    status: statusFilter,
+                    page: page
+                }
             });
             
             if (response.data && response.data.data) {
                 setServices(response.data.data);
+                setPagination(response.data.meta);
             }
         } catch (error) {
             console.error("Error fetching services", error);
@@ -74,7 +80,7 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
 
     // Trigger search/filter
     useEffect(() => {
-        fetchServices();
+        fetchServices(1);
     }, [debouncedSearch, statusFilter]);
 
     const handleOpenModal = (service = null) => {
@@ -121,7 +127,6 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this service?')) return;
         
         try {
             await axios.delete(`/api/services/${id}`);
@@ -188,6 +193,8 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
                                 setSearch={setSearch}
                                 statusFilter={statusFilter}
                                 setStatusFilter={setStatusFilter}
+                                pagination={pagination}
+                                onPageChange={fetchServices}
                             />
                         )
                     ) : currentView === 'settings' ? (
