@@ -14,7 +14,7 @@ class ServiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Service::query();
+        $query = $request->user()->services();
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -54,7 +54,7 @@ class ServiceController extends Controller
             ], 422);
         }
 
-        $service = Service::create($request->all());
+        $service = $request->user()->services()->create($request->all());
 
         return response()->json([
             'status' => 'success',
@@ -66,8 +66,14 @@ class ServiceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Service $service)
+    public function show(Request $request, $id)
     {
+        $service = $request->user()->services()->find($id);
+
+        if (!$service) {
+            return response()->json(['status' => 'error', 'message' => 'Service not found'], 404);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => $service
@@ -77,8 +83,14 @@ class ServiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Service $service)
+    public function update(Request $request, $id)
     {
+        $service = $request->user()->services()->find($id);
+
+        if (!$service) {
+            return response()->json(['status' => 'error', 'message' => 'Service not found'], 404);
+        }
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -105,8 +117,14 @@ class ServiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Service $service)
+    public function destroy(Request $request, $id)
     {
+        $service = $request->user()->services()->find($id);
+
+        if (!$service) {
+            return response()->json(['status' => 'error', 'message' => 'Service not found'], 404);
+        }
+
         $service->delete();
 
         return response()->json([
@@ -118,8 +136,17 @@ class ServiceController extends Controller
     /**
      * Toggle service status.
      */
-    public function toggleStatus(Service $service)
+    public function toggleStatus(Request $request, $id)
     {
+        $service = $request->user()->services()->find($id);
+
+        if (!$service) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Service not found'
+            ], 404);
+        }
+
         $service->status = $service->status === 'active' ? 'inactive' : 'active';
         $service->save();
 

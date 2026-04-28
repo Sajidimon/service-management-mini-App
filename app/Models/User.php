@@ -39,11 +39,11 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    /**
+     * Get the services for the user.
+     */
+    public function services()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Service::class);
     }
 }

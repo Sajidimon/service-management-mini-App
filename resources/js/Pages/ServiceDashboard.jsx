@@ -27,9 +27,10 @@ import EmptyState from '@/Components/Dashboard/EmptyState';
 import ServiceList from '@/Components/Dashboard/ServiceList';
 import ServiceModal from '@/Components/Dashboard/ServiceModal';
 import ProfileSettings from '@/Components/Dashboard/ProfileSettings';
+import DashboardOverview from '@/Components/Dashboard/DashboardOverview';
 
 export default function ServiceDashboard({ auth, services: initialServices = [], filters }) {
-    const [currentView, setCurrentView] = useState('services');
+    const [currentView, setCurrentView] = useState('dashboard');
     const [services, setServices] = useState(Array.isArray(initialServices) ? initialServices : []);
     const [search, setSearch] = useState(filters?.search || '');
     const [statusFilter, setStatusFilter] = useState(filters?.status || '');
@@ -39,7 +40,17 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
     const { isOpen: isSidebarOpen, onOpen: onSidebarOpen, onClose: onSidebarClose } = useDisclosure();
     
     const [editingService, setEditingService] = useState(null);
-    const [data, setData] = useState({ title: '', description: '', category: '', status: 'active' });
+    const [data, setRawData] = useState({
+        title: '',
+        description: '',
+        category: '',
+        status: 'active',
+    });
+
+    // Helper to update data like Inertia's useForm
+    const setData = (key, value) => {
+        setRawData(prev => ({ ...prev, [key]: value }));
+    };
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
     
@@ -68,9 +79,9 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
 
     const handleOpenModal = (service = null) => {
         setErrors({});
-        if (service) {
+        if (service && service.id) {
             setEditingService(service);
-            setData({
+            setRawData({
                 title: service.title,
                 description: service.description || '',
                 category: service.category,
@@ -78,7 +89,7 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
             });
         } else {
             setEditingService(null);
-            setData({ title: '', description: '', category: '', status: 'active' });
+            setRawData({ title: '', description: '', category: '', status: 'active' });
         }
         onModalOpen();
     };
@@ -122,6 +133,7 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
     };
 
     const handleToggleStatus = async (id) => {
+        if (!id) return;
         try {
             await axios.patch(`/api/services/${id}/toggle`);
             fetchServices();
@@ -181,10 +193,7 @@ export default function ServiceDashboard({ auth, services: initialServices = [],
                     ) : currentView === 'settings' ? (
                         <ProfileSettings user={auth.user} />
                     ) : (
-                        <VStack py={20} align="center">
-                            <Heading size="lg">Dashboard Overview</Heading>
-                            <Text color="gray.500">Welcome back, {auth.user.name}!</Text>
-                        </VStack>
+                        <DashboardOverview />
                     )}
                 </Container>
             </Box>

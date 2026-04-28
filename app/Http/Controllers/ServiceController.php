@@ -10,7 +10,7 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Service::query();
+        $query = $request->user()->services();
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
