@@ -12,9 +12,23 @@ class ServiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::all();
+        $query = Service::query();
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $services = $query->latest()->get();
+
         return response()->json([
             'status' => 'success',
             'data' => $services
@@ -46,23 +60,14 @@ class ServiceController extends Controller
             'status' => 'success',
             'message' => 'Service created successfully',
             'data' => $service
-        ], 211);
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Service $service)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Service not found'
-            ], 444);
-        }
-
         return response()->json([
             'status' => 'success',
             'data' => $service
@@ -72,22 +77,13 @@ class ServiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Service $service)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Service not found'
-            ], 444);
-        }
-
         $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'sometimes|required|string|max:255',
-            'status' => 'sometimes|required|in:active,inactive',
+            'category' => 'required|string|max:255',
+            'status' => 'required|in:active,inactive',
         ]);
 
         if ($validator->fails()) {
@@ -109,22 +105,28 @@ class ServiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Service $service)
     {
-        $service = Service::find($id);
-
-        if (!$service) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Service not found'
-            ], 444);
-        }
-
         $service->delete();
 
         return response()->json([
             'status' => 'success',
             'message' => 'Service deleted successfully'
+        ]);
+    }
+
+    /**
+     * Toggle service status.
+     */
+    public function toggleStatus(Service $service)
+    {
+        $service->status = $service->status === 'active' ? 'inactive' : 'active';
+        $service->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Status toggled successfully',
+            'data' => $service
         ]);
     }
 }

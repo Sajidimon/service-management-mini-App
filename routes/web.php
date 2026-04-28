@@ -17,7 +17,6 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [ServiceController::class, 'index'])->name('dashboard');
-    Route::resource('services', ServiceController::class)->only(['store', 'update', 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {

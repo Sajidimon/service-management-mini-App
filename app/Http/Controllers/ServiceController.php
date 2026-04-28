@@ -8,45 +8,85 @@ use Inertia\Inertia;
 
 class ServiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Service::query();
+
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $services = $query->latest()->get();
+
+        if ($request->wantsJson()) {
+            return response()->json($services);
+        }
+
         return Inertia::render('ServiceDashboard', [
-            'services' => Service::latest()->get()
+            'services' => $services,
+            'filters' => $request->only(['search', 'status'])
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:255',
+            'category' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);
 
-        Service::create($request->all());
+        $service = Service::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($service, 201);
+        }
 
         return redirect()->back();
     }
 
     public function update(Request $request, Service $service)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:255',
+            'category' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);
 
-        $service->update($request->all());
+        $service->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($service);
+        }
 
         return redirect()->back();
     }
 
-    public function destroy(Service $service)
+    public function destroy(Request $request, Service $service)
     {
         $service->delete();
 
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Service deleted']);
+        }
+
         return redirect()->back();
+    }
+
+    public function toggleStatus(Request $request, Service $service)
+    {
+        $service->status = $service->status === 'active' ? 'inactive' : 'active';
+        $service->save();
+
+        return response()->json($service);
     }
 }
