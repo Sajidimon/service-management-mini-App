@@ -1,4 +1,4 @@
-# Digital Service Orchestrator
+# Digital Service Web App
 
 ![Digital Service Management Dashboard](public/images/hero-dashboard.png)
 
@@ -22,7 +22,7 @@ A modern, high-performance Service Management application built with **Laravel 1
 - **Frontend**: React 18, Inertia.js
 - **Styling**: Chakra UI (Modern CSS-in-JS)
 - **Icons**: React Icons (Material Design)
-- **Database**: MySQL / SQLite
+- **Database**: MySQL
 - **HTTP Client**: Axios
 
 ## 📦 Installation Guide
@@ -34,11 +34,11 @@ Ensure you have the following installed:
 - PHP >= 8.2
 - Composer
 - Node.js & NPM
-- MySQL or SQLite
+- MySQL
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/service-management-mini-App.git
+git clone https://github.com/sajidimon/service-management-mini-App.git
 cd service-management-mini-App
 ```
 
@@ -76,7 +76,6 @@ Visit `http://127.0.0.1:8000` to see the application in action.
 ## 🧪 Development Commands
 
 - `php artisan migrate:fresh`: Reset and re-run all migrations.
-- `php artisan db:seed`: Seed the database with sample data.
 - `npm run build`: Create a production-ready bundle.
 
 ## 📄 License
