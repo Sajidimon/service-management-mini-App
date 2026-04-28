@@ -1,4 +1,4 @@
-# Digital Service Orchestrator
+# Digital Service Web App
 
 A modern, high-performance Service Management application built with **Laravel 11**, **Inertia.js**, **React**, and **Chakra UI**. This project features a cutting-edge fintech/cyber aesthetic and a robust backend designed for scaling digital service workflows.
 
@@ -64,17 +64,12 @@ php artisan migrate
 ### 6. Run the Application
 You will need to run two processes simultaneously:
 
-**Start the Laravel Server:**
-```bash
-php artisan serve
-```
-
 **Start the Vite Development Server:**
 ```bash
-npm run dev
+npm run serve
 ```
 
-Visit `http://localhost:8000` to see the application in action.
+Visit `http://127.0.0.1:8000` to see the application in action.
 
 ## 🧪 Development Commands
 
